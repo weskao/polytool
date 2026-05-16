@@ -1,0 +1,24 @@
+[project]
+name = "polytool"
+version = "0.1.0"
+description = "Personal CLI toolbox extracted from ~/.zshrc, packaged as uv tools"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "polytool" }]
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+gtrans = "polytool.gtrans:main"
+charcount = "polytool.charcount:main"
+imgmin = "polytool.imgmin:main"
+resize-image = "polytool.resize:main"
+towebp = "polytool.towebp:main"
+html2md = "polytool.html_to_md:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/polytool"]
