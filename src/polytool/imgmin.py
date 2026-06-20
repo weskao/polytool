@@ -15,7 +15,7 @@ import tempfile
 from pathlib import Path
 from typing import Iterable
 
-from ._utils import ensure_brew_package, have, log_red
+from ._utils import ensure_tool, have, log_red
 
 SUPPORTED_EXTS = {
     ".png", ".jpg", ".jpeg", ".webp", ".svg", ".gif",
@@ -134,7 +134,7 @@ def _print_table(rows: list) -> None:
 # ── compressors per format ────────────────────────────────────────────────
 
 def _pngquant_compress(target: Path) -> bool:
-    if not ensure_brew_package("pngquant") or not ensure_brew_package("oxipng"):
+    if not ensure_tool("pngquant") or not ensure_tool("oxipng"):
         return False
     tmp = target.with_name(target.stem + ".__pq.tmp.png")
     res = subprocess.run(
@@ -151,7 +151,7 @@ def _pngquant_compress(target: Path) -> bool:
 
 
 def _compress_jpeg(file: Path, target: Path, max_q: int = 85) -> bool:
-    if not ensure_brew_package("jpegoptim"):
+    if not ensure_tool("jpegoptim"):
         return False
     shutil.copy2(file, target)
     subprocess.run(
@@ -162,7 +162,7 @@ def _compress_jpeg(file: Path, target: Path, max_q: int = 85) -> bool:
 
 
 def _compress_webp(file: Path, target: Path) -> bool:
-    if not ensure_brew_package("webp", "cwebp"):
+    if not ensure_tool("webp", "cwebp"):
         return False
     tmp = target.with_name(target.name + ".tmp.webp")
     res = subprocess.run(
@@ -181,14 +181,14 @@ def _compress_webp(file: Path, target: Path) -> bool:
 
 
 def _compress_svg(file: Path, target: Path) -> bool:
-    if not ensure_brew_package("svgo"):
+    if not ensure_tool("svgo"):
         return False
     subprocess.run(["svgo", "--multipass", "--quiet", str(file), "-o", str(target)], capture_output=True)
     return True
 
 
 def _compress_gif(file: Path, target: Path) -> bool:
-    if not ensure_brew_package("gifsicle"):
+    if not ensure_tool("gifsicle"):
         return False
     shutil.copy2(file, target)
     subprocess.run(["gifsicle", "-O3", "--lossy=30", "--batch", str(target)], capture_output=True)
@@ -197,7 +197,12 @@ def _compress_gif(file: Path, target: Path) -> bool:
 
 def _compress_heic(file: Path, target: Path) -> bool:
     if not have("sips"):
-        log_red("imgmin: sips not found (HEIC support requires macOS)")
+        # Re-encoding HEIC→HEIC needs macOS 'sips'; there is no portable
+        # same-format encoder. Point users at the cross-platform --to-png path.
+        log_red(
+            "imgmin: HEIC re-compression requires macOS 'sips'. "
+            "On Windows/Linux, convert instead with:  imgmin <file> --to-png"
+        )
         return False
     tmp = target.with_name(target.name + ".tmp.heic")
     res = subprocess.run(
@@ -230,22 +235,34 @@ def _sharp_to_png(file: Path, target: Path) -> bool:
 
 
 def _to_jpeg(file: Path, target: Path, ext: str) -> bool:
-    if not ensure_brew_package("jpegoptim"):
+    if not ensure_tool("jpegoptim"):
         return False
     if ext in ("jpg", "jpeg"):
         shutil.copy2(file, target)
     elif ext == "heic":
-        if not have("sips"):
-            log_red("imgmin: HEIC→JPEG needs sips (macOS only)")
-            return False
-        res = subprocess.run(
-            ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "70",
-             str(file), "--out", str(target)],
-            capture_output=True,
-        )
-        if res.returncode != 0:
-            log_red(f"imgmin: sips HEIC→JPEG failed for {file}")
-            return False
+        if have("sips"):
+            res = subprocess.run(
+                ["sips", "-s", "format", "jpeg", "-s", "formatOptions", "70",
+                 str(file), "--out", str(target)],
+                capture_output=True,
+            )
+            if res.returncode != 0:
+                log_red(f"imgmin: sips HEIC→JPEG failed for {file}")
+                return False
+        else:
+            # Non-macOS: route through sharp (works if libvips has libheif).
+            sharp = _resolve_sharp()
+            if not sharp:
+                log_red("imgmin: HEIC→JPEG needs macOS 'sips' or sharp-cli with libheif support")
+                return False
+            with tempfile.TemporaryDirectory(prefix="imgmin-sharp.") as tmp:
+                res = subprocess.run([sharp, "-i", str(file), "-o", tmp, "-f", "jpeg"], capture_output=True)
+                produced = sorted(Path(tmp).glob("*.jpeg")) + sorted(Path(tmp).glob("*.jpg"))
+                if res.returncode == 0 and produced and produced[0].stat().st_size > 0:
+                    shutil.move(produced[0], target)
+                else:
+                    log_red(f"imgmin: sharp HEIC→JPEG failed for {file} (libheif support required)")
+                    return False
     elif ext in ("png", "webp", "heif", "tiff", "tif", "bmp", "avif", "raw", "gif"):
         sharp = _resolve_sharp()
         if sharp:
@@ -299,13 +316,17 @@ def _compress_one(
         if ext == "png":
             shutil.copy2(file, target)
         elif ext == "heic":
-            if not have("sips"):
-                log_red("imgmin: HEIC→PNG needs sips (macOS only)")
-                return False
-            res = subprocess.run(["sips", "-s", "format", "png", str(file), "--out", str(target)], capture_output=True)
-            if res.returncode != 0:
-                log_red(f"imgmin: sips HEIC→PNG failed for {file}")
-                return False
+            if have("sips"):
+                res = subprocess.run(["sips", "-s", "format", "png", str(file), "--out", str(target)], capture_output=True)
+                if res.returncode != 0:
+                    log_red(f"imgmin: sips HEIC→PNG failed for {file}")
+                    return False
+            else:
+                # Non-macOS: route through sharp (works if libvips has libheif).
+                if not _sharp_to_png(file, target):
+                    log_red(f"imgmin: HEIC→PNG needs macOS 'sips' or sharp-cli with libheif support ({file})")
+                    return False
+                return True  # _sharp_to_png already ran pngquant
         else:
             if not _sharp_to_png(file, target):
                 return False

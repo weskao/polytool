@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ._utils import ensure_brew_package, log_green, log_red
+from ._utils import ensure_tool, log_green, log_red
 
 
 def _convert(src: Path) -> bool:
@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if not ensure_brew_package("pandoc"):
+    if not ensure_tool("pandoc"):
         return 1
 
     if not args.file:

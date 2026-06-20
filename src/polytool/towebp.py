@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ._utils import ensure_brew_package, log_green, log_red, log_yellow
+from ._utils import ensure_tool, log_green, log_red, log_yellow
 
 SUPPORTED_EXTS = {".png", ".jpg", ".jpeg"}
 
@@ -37,7 +37,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if not ensure_brew_package("webp", "cwebp"):
+    if not ensure_tool("webp", "cwebp"):
         return 1
 
     root = Path.cwd()

@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from ._utils import ensure_brew_package, log_green, log_red, log_yellow
+from ._utils import ensure_tool, log_green, log_red, log_yellow
 
 SUPPORTED_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("files", nargs="*", help="Specific files (default: all in current folder)")
     args = parser.parse_args(argv)
 
-    if not ensure_brew_package("imagemagick", "magick"):
+    if not ensure_tool("imagemagick", "magick"):
         return 1
 
     cwd = Path.cwd()
