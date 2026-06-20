@@ -135,11 +135,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"📄 Translating file: {path}", file=sys.stderr)
         print("─────────────────────────────────────────", file=sys.stderr)
     else:
-        # argparse REMAINDER preserves order; strip the literal "-e" if it leaked
-        # through positionally on systems where flag parsing stops at the first
-        # non-flag (the zsh wrapper also tolerates flag-after-positional).
-        positional = [a for a in args.text if not a.startswith("-")]
-        text = " ".join(positional)
+        # Everything after the consumed flags is translation content — including
+        # tokens that begin with "-" (e.g. "-50% off"). Quotes are optional:
+        # `ge 哈囉` and `ge "哈囉"` produce identical input.
+        text = " ".join(args.text)
 
     if not text:
         parser.print_help(sys.stderr)
