@@ -14,13 +14,26 @@ FILE = (
     / "Data/Library/Application Support/vChewing/userdata-cht.txt"
 )
 
+# The "Reload User Phrases" command lives in vChewing's input-method status
+# menu, which on modern macOS is hosted by the TextInputMenuAgent process (not
+# the vChewing process itself). The status item only exposes vChewing's menu
+# when vChewing is the active input source, so we filter by description and
+# fail with a clear message otherwise.
 _RELOAD_SCRIPT = """
 tell application "System Events"
-    tell process "vChewing"
-        set mb to menu bar item 1 of menu bar 2
+    tell process "TextInputMenuAgent"
+        set imItems to (menu bar items of menu bar 2 whose description contains "vChewing")
+        if imItems is {} then error "vChewing is not the active input source"
+        set mb to item 1 of imItems
         click mb
         delay 0.3
-        click menu item "Reload User Phrases" of menu 1 of mb
+        try
+            click menu item "Reload User Phrases" of menu 1 of mb
+        on error errMsg
+            -- Dismiss the menu we just opened so it is not left hanging on screen.
+            key code 53
+            error errMsg
+        end try
     end tell
 end tell
 """
@@ -31,7 +44,19 @@ def _to_bopomofo(word: str) -> str:
 
 
 def _reload_vchewing() -> None:
-    result = subprocess.run(["osascript", "-e", _RELOAD_SCRIPT], capture_output=True, text=True)
+    # A bounded timeout keeps osascript from hanging indefinitely on the UI; on
+    # timeout subprocess.run kills the child and reaps it, so no process is left
+    # behind.
+    try:
+        result = subprocess.run(
+            ["osascript", "-e", _RELOAD_SCRIPT],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired:
+        print("Reload failed (手動按 Reload User Phrases): osascript timed out")
+        return
     if result.returncode == 0:
         print("vChewing reloaded.")
     else:
