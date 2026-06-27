@@ -55,12 +55,12 @@ def _reload_vchewing() -> None:
             timeout=10,
         )
     except subprocess.TimeoutExpired:
-        print("Reload failed (手動按 Reload User Phrases): osascript timed out")
+        print("Reload failed (manually press Reload User Phrases): osascript timed out")
         return
     if result.returncode == 0:
         print("vChewing reloaded.")
     else:
-        print(f"Reload failed (手動按 Reload User Phrases): {result.stderr.strip()}")
+        print(f"Reload failed (manually press Reload User Phrases): {result.stderr.strip()}")
 
 
 def main(argv: list[str] | None = None) -> int:
