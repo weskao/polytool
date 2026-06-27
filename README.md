@@ -12,12 +12,11 @@ install, terminal colors) are handled automatically per platform.
 
 ## Install (all tools in one shot)
 
-Pin to the latest release tag from
-[Releases](https://github.com/weskao/polytool/releases)
-(currently `v0.1.0`):
+Replace `vX.Y.Z` with the latest tag from
+[Releases](https://github.com/weskao/polytool/releases):
 
 ```sh
-uv tool install --from git+https://github.com/weskao/polytool.git@v0.1.0 polytool
+uv tool install --from git+https://github.com/weskao/polytool.git@vX.Y.Z polytool
 ```
 
 Or install the latest `main`:
@@ -46,7 +45,7 @@ uv tool upgrade polytool
 ## Reinstall (force)
 
 ```sh
-uv tool install --reinstall --from git+https://github.com/weskao/polytool.git@v0.1.0 polytool
+uv tool install --reinstall --from git+https://github.com/weskao/polytool.git@vX.Y.Z polytool
 ```
 
 ## Uninstall
@@ -337,7 +336,7 @@ reinstall pinned to a tag:
 ```sh
 uv cache clean
 uv tool uninstall polytool 2>/dev/null
-uv tool install --reinstall --from git+https://github.com/weskao/polytool.git@v0.1.0 polytool
+uv tool install --reinstall --from git+https://github.com/weskao/polytool.git@vX.Y.Z polytool
 ```
 
 ### `Permission denied (publickey)` when using an `ssh://` URL
