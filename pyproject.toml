@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "polytool" }]
 license = { text = "MIT" }
-dependencies = []
+dependencies = ["pypinyin"]
 
 [project.scripts]
 gtrans = "polytool.gtrans:main"
@@ -15,6 +15,7 @@ imgmin = "polytool.imgmin:main"
 resize-image = "polytool.resize:main"
 towebp = "polytool.towebp:main"
 html2md = "polytool.html_to_md:main"
+vcadd = "polytool.vcadd:main"
 
 [build-system]
 requires = ["hatchling"]
