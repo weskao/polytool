@@ -45,7 +45,7 @@ def main(argv: list[str] | None = None) -> int:
         cwd = Path.cwd()
         found = list(cwd.glob("*.html"))
         if not found:
-            print("⚠️  當前目錄找不到任何 .html 檔", file=sys.stderr)
+            print("⚠️  No .html files found in the current directory.", file=sys.stderr)
             return 0
         ok = True
         for f in found:
@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
         arg = arg[:-3] + ".html"
     path = Path(arg)
     if not path.is_file():
-        print(f"❌ 找不到檔案:{arg}", file=sys.stderr)
+        print(f"❌ File not found: {arg}", file=sys.stderr)
         return 1
     return 0 if _convert(path) else 1
 

@@ -72,9 +72,9 @@ def _resolve_sharp() -> str | None:
         if candidates:
             return str(candidates[0])
     if not shutil.which("npm"):
-        log_red("❌ 找不到 npm,sharp-cli 需要 Node.js,請先安裝 Node.js")
+        log_red("❌ npm not found; sharp-cli requires Node.js — please install Node.js first")
         return None
-    print("⚠️  未偵測到 sharp-cli,嘗試透過 npm 安裝...", file=sys.stderr)
+    print("⚠️  sharp-cli not detected, attempting to install via npm...", file=sys.stderr)
     res = subprocess.run(["npm", "install", "-g", "sharp-cli"])
     if res.returncode != 0:
         return None
