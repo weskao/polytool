@@ -62,9 +62,16 @@ tell application "System Events"
             key code 53
             error "vChewing not found in input source list"
         end if
-        delay 0.6
-        set imItems to (menu bar items of mb2 whose description contains "vChewing")
-        if imItems is {} then error "vChewing did not become active after switching"
+        set didActivate to false
+        repeat 6 times
+            delay 0.4
+            set imItems to (menu bar items of mb2 whose description contains "vChewing")
+            if imItems is not {} then
+                set didActivate to true
+                exit repeat
+            end if
+        end repeat
+        if not didActivate then error "vChewing did not become active after switching"
         set mb to item 1 of imItems
         click mb
         delay 0.3
