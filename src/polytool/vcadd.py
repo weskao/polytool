@@ -38,6 +38,46 @@ tell application "System Events"
 end tell
 """
 
+# When vChewing is not the active input source, open the IM picker menu, click
+# the vChewing entry to activate it, then reload.  Direct menu items of the
+# picker are the installed input sources listed by name.
+_SWITCH_AND_RELOAD_SCRIPT = """
+tell application "System Events"
+    tell process "TextInputMenuAgent"
+        set mb2 to menu bar 2
+        set mbItem to (first menu bar item of mb2)
+        click mbItem
+        delay 0.4
+        set didSwitch to false
+        repeat with mi in (menu items of menu 1 of mbItem)
+            try
+                if (name of mi) contains "vChewing" then
+                    click mi
+                    set didSwitch to true
+                    exit repeat
+                end if
+            end try
+        end repeat
+        if not didSwitch then
+            key code 53
+            error "vChewing not found in input source list"
+        end if
+        delay 0.6
+        set imItems to (menu bar items of mb2 whose description contains "vChewing")
+        if imItems is {} then error "vChewing did not become active after switching"
+        set mb to item 1 of imItems
+        click mb
+        delay 0.3
+        try
+            click menu item "Reload User Phrases" of menu 1 of mb
+        on error errMsg
+            key code 53
+            error errMsg
+        end try
+    end tell
+end tell
+"""
+
 
 def _to_bopomofo(word: str) -> str:
     return "-".join(lazy_pinyin(word, style=Style.BOPOMOFO))
@@ -59,8 +99,25 @@ def _reload_vchewing() -> None:
         return
     if result.returncode == 0:
         print("vChewing reloaded.")
-    else:
+        return
+    if "not the active input source" not in result.stderr:
         print(f"Reload failed (manually press Reload User Phrases): {result.stderr.strip()}")
+        return
+    # vChewing is not active — switch to it via the IM picker menu, then reload.
+    try:
+        result2 = subprocess.run(
+            ["osascript", "-e", _SWITCH_AND_RELOAD_SCRIPT],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+    except subprocess.TimeoutExpired:
+        print("Reload failed (manually press Reload User Phrases): osascript timed out")
+        return
+    if result2.returncode == 0:
+        print("vChewing reloaded.")
+    else:
+        print(f"Reload failed (manually press Reload User Phrases): {result2.stderr.strip()}")
 
 
 def main(argv: list[str] | None = None) -> int:
