@@ -8,6 +8,8 @@ from pathlib import Path
 
 from pypinyin import Style, lazy_pinyin
 
+from polytool._utils import git_sync, is_git_repo
+
 FILE = (
     Path.home()
     / "Library/Containers/org.atelierInmu.inputmethod.vChewing"
@@ -102,13 +104,13 @@ def _reload_vchewing() -> None:
             timeout=10,
         )
     except subprocess.TimeoutExpired:
-        print("Reload failed (manually press Reload User Phrases): osascript timed out")
+        print("⚠️  Reload failed (manually press Reload User Phrases): osascript timed out")
         return
     if result.returncode == 0:
-        print("vChewing reloaded.")
+        print("🔄 vChewing reloaded.")
         return
     if "not the active input source" not in result.stderr:
-        print(f"Reload failed (manually press Reload User Phrases): {result.stderr.strip()}")
+        print(f"⚠️  Reload failed (manually press Reload User Phrases): {result.stderr.strip()}")
         return
     # vChewing is not active — switch to it via the IM picker menu, then reload.
     try:
@@ -119,12 +121,12 @@ def _reload_vchewing() -> None:
             timeout=15,
         )
     except subprocess.TimeoutExpired:
-        print("Reload failed (manually press Reload User Phrases): osascript timed out")
+        print("⚠️  Reload failed (manually press Reload User Phrases): osascript timed out")
         return
     if result2.returncode == 0:
-        print("vChewing reloaded.")
+        print("🔄 vChewing reloaded.")
     else:
-        print(f"Reload failed (manually press Reload User Phrases): {result2.stderr.strip()}")
+        print(f"⚠️  Reload failed (manually press Reload User Phrases): {result2.stderr.strip()}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -147,16 +149,22 @@ def main(argv: list[str] | None = None) -> int:
             f.write("\n")
         for word in args:
             if word in existing:
-                print(f"Already exists: {word}")
+                print(f"⏭️  Already exists: {word}")
                 continue
             entry = f"{word} {_to_bopomofo(word)}"
             f.write(entry + "\n")
             existing.add(word)
             added.append(entry)
-            print(f"Added: {entry}")
+            print(f"✅ Added: {entry}")
 
     if added:
         _reload_vchewing()
+        repo_dir = FILE.parent
+        if is_git_repo(repo_dir):
+            words = ", ".join(w.split()[0] for w in added)
+            git_steps = git_sync(repo_dir, FILE, f"vcadd: {words}")
+            if git_steps:
+                print("📦 Git: " + " → ".join(git_steps))
     return 0
 
 
