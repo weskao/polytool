@@ -52,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_dir = FILE.parent
         if is_git_repo(repo_dir):
             words = ", ".join(w.split()[0] for w in added)
-            git_steps = git_sync(repo_dir, FILE, f"vcadd: {words}")
+            git_steps = git_sync(repo_dir, FILE, f"feat(userdata-cht): add phrase {words}")
             if git_steps:
                 print("📦 Git: " + " → ".join(git_steps))
     return 0
