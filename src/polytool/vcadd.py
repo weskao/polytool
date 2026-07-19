@@ -23,8 +23,24 @@ def _to_bopomofo(word: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
 
+    if args and args[0] in ("-h", "--help"):
+        print("Usage: vcadd <Chinese word/phrase>")
+        return 0
     if not args:
         print("Usage: vcadd <Chinese word/phrase>", file=sys.stderr)
+        return 1
+    if sys.platform != "darwin":
+        print("vcadd requires macOS and the vChewing input method.", file=sys.stderr)
+        return 1
+    if not FILE.is_file():
+        message = (
+            f"vChewing user dictionary not found: {FILE}\n"
+            + "Install and launch vChewing before using vcadd."
+        )
+        print(
+            message,
+            file=sys.stderr,
+        )
         return 1
 
     content = FILE.read_text(encoding="utf-8")
