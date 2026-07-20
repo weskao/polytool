@@ -18,9 +18,14 @@ from unittest import mock
 from polytool import ai_accounts as aa
 
 
-def _fake(module: str, stdout: str, returncode: int = 0) -> subprocess.CompletedProcess[str]:
+def _fake(
+    module: str, stdout: str, returncode: int = 0
+) -> subprocess.CompletedProcess[str]:
     return subprocess.CompletedProcess(
-        args=["python", "-m", module, "list"], returncode=returncode, stdout=stdout, stderr=""
+        args=["python", "-m", module, "list"],
+        returncode=returncode,
+        stdout=stdout,
+        stderr="",
     )
 
 
@@ -37,7 +42,11 @@ class AiAccountsTest(unittest.TestCase):
             if module == "polytool.codex_accounts":
                 codex_may_finish.wait(timeout=5)
                 return _fake(module, "CODEX-TABLE")
-            table = "CLAUDE-TABLE" if module == "polytool.claude_accounts" else "AGY-TABLE"
+            table = {
+                "polytool.claude_accounts": "CLAUDE-TABLE",
+                "polytool.gemini_accounts": "AGY-TABLE",
+                "polytool.grok_accounts": "GROK-TABLE",
+            }[module]
             result = _fake(module, table)
             with lock:
                 finished.append(module)
@@ -53,7 +62,13 @@ class AiAccountsTest(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertLess(text.index("CLAUDE-TABLE"), text.index("CODEX-TABLE"))
         self.assertLess(text.index("AGY-TABLE"), text.index("CODEX-TABLE"))
-        for label in ("codex-accounts", "claude-accounts", "agy-accounts"):
+        self.assertLess(text.index("GROK-TABLE"), text.index("CODEX-TABLE"))
+        for label in (
+            "codex-accounts",
+            "claude-accounts",
+            "agy-accounts",
+            "grok-accounts",
+        ):
             self.assertIn(label, text)
 
     def test_list_spinner_messages_count_down_as_providers_finish(self) -> None:
@@ -71,8 +86,11 @@ class AiAccountsTest(unittest.TestCase):
 
         outputs = {
             "polytool.codex_accounts": _fake("polytool.codex_accounts", "CODEX-TABLE"),
-            "polytool.claude_accounts": _fake("polytool.claude_accounts", "CLAUDE-TABLE"),
+            "polytool.claude_accounts": _fake(
+                "polytool.claude_accounts", "CLAUDE-TABLE"
+            ),
             "polytool.gemini_accounts": _fake("polytool.gemini_accounts", "AGY-TABLE"),
+            "polytool.grok_accounts": _fake("polytool.grok_accounts", "GROK-TABLE"),
         }
         with mock.patch.object(aa, "Spinner", RecordingSpinner):
             with mock.patch.object(aa, "_run_list", side_effect=lambda m: outputs[m]):
@@ -81,7 +99,8 @@ class AiAccountsTest(unittest.TestCase):
         self.assertEqual(
             messages,
             [
-                "Fetching accounts from 3 providers…",
+                "Fetching accounts from 4 providers…",
+                "Fetching remaining 3 providers…",
                 "Fetching remaining 2 providers…",
                 "Fetching remaining 1 provider…",
             ],
@@ -124,7 +143,12 @@ class AiAccountsTest(unittest.TestCase):
         modules = [c[2] for c in calls]  # cmd = [python, -m, <module>, ...]
         self.assertEqual(
             modules,
-            ["polytool.codex_accounts", "polytool.claude_accounts", "polytool.gemini_accounts"],
+            [
+                "polytool.codex_accounts",
+                "polytool.claude_accounts",
+                "polytool.gemini_accounts",
+                "polytool.grok_accounts",
+            ],
         )
         for c in calls:
             self.assertEqual(c[-2:], ["refresh", "--all"])
