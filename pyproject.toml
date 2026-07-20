@@ -17,6 +17,7 @@ towebp = "polytool.towebp:main"
 html2md = "polytool.html_to_md:main"
 vcadd = "polytool.vcadd:main"
 codex-accounts = "polytool.codex_accounts:main"
+claude-accounts = "polytool.claude_accounts:main"
 agy-accounts = "polytool.gemini_accounts:main"
 
 [build-system]
