@@ -13,7 +13,7 @@ from unittest import mock
 
 from polytool import gemini_accounts as ga
 from polytool import gemini_usage as gu
-from polytool.codex_usage import UsageWindow
+from polytool.usage_format import UsageWindow
 
 
 def _jwt(payload: ga.JsonDict) -> str:
