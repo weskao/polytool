@@ -12,9 +12,9 @@ from ._utils import ensure_tool, log_green, log_red, log_yellow
 SUPPORTED_EXTS = {".png", ".jpg", ".jpeg"}
 
 
-def _convert(path: Path) -> bool:
+def _convert(path: Path, quality: int) -> bool:
     output = path.with_suffix(".webp")
-    res = subprocess.run(["cwebp", str(path), "-o", str(output)], capture_output=True)
+    res = subprocess.run(["cwebp", "-q", str(quality), str(path), "-o", str(output)], capture_output=True)
     if res.returncode == 0:
         path.unlink(missing_ok=True)
         log_green("Converted:")
@@ -35,6 +35,13 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Process only the current folder (default: recurse into subfolders)",
     )
+    parser.add_argument(
+        "-q",
+        "--quality",
+        type=int,
+        default=75,
+        help="Compression quality (0-100, default: 75)",
+    )
     args = parser.parse_args(argv)
 
     if not ensure_tool("webp", "cwebp"):
@@ -51,7 +58,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     for p in candidates:
-        _convert(p)
+        _convert(p, args.quality)
     return 0
 
 
