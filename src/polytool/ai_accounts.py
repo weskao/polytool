@@ -26,6 +26,7 @@ _TOOLS: list[tuple[str, str]] = [
     ("claude-accounts", "polytool.claude_accounts"),
     ("agy-accounts", "polytool.gemini_accounts"),
     ("grok-accounts", "polytool.grok_accounts"),
+    ("vibe-accounts", "polytool.vibe_accounts"),
 ]
 
 # Subcommands every per-provider tool understands (shared surface). Anything
@@ -78,7 +79,7 @@ USAGE
   ai-accounts timer-status          Report whether the auto-switch check is scheduled
   ai-accounts -h | --help | help     Show this help
 
-Each command is forwarded to codex-accounts, claude-accounts, agy-accounts, and grok-accounts.
+Each command is forwarded to codex-accounts, claude-accounts, agy-accounts, grok-accounts, and vibe-accounts.
 `list` runs them concurrently and prints each table as soon as it finishes
 (fastest provider first), with a spinner tracking how many are still
 fetching in between; every other command runs them one provider at a time
