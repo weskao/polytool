@@ -1,3 +1,11 @@
+## [Unreleased]
+
+### Changed
+
+- AI account management moved to
+  [ai-accounts](https://github.com/weskao/ai-accounts); this package now ships
+  only its personal utility commands.
+
 ## [5.0.0] - 2026-08-21
 
 ### 🚀 Features
