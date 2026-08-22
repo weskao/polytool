@@ -1,7 +1,7 @@
 [project]
 name = "polytool"
 version = "5.0.0"
-description = "Personal CLI toolbox extracted from ~/.zshrc, packaged as uv tools"
+description = "Personal text, image, conversion, and vChewing CLI tools"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "polytool" }]
@@ -16,12 +16,6 @@ resize-image = "polytool.resize:main"
 towebp = "polytool.towebp:main"
 html2md = "polytool.html_to_md:main"
 vcadd = "polytool.vcadd:main"
-codex-accounts = "polytool.codex_accounts:main"
-claude-accounts = "polytool.claude_accounts:main"
-agy-accounts = "polytool.gemini_accounts:main"
-grok-accounts = "polytool.grok_accounts:main"
-vibe-accounts = "polytool.vibe_accounts:main"
-ai-accounts = "polytool.ai_accounts:main"
 
 [build-system]
 requires = ["hatchling"]

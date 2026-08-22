@@ -29,5 +29,3 @@ jobs:
       - run: uv run towebp --help
       - run: uv run html2md --help
       - run: uv run vcadd --help
-      - run: uv run codex-accounts --help
-      - run: uv run agy-accounts --help
