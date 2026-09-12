@@ -17,7 +17,7 @@ from pathlib import Path
 from ._utils import copy_to_clipboard
 
 CHAR_LIMIT = 4500
-API_URL = "https://translate.googleapis.com/translate_a/single?client=gtx&sl={sl}&tl={tl}&dt=t"
+API_URL = "https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl={sl}&tl={tl}&dt=t"
 
 
 def _translate_chunk(text: str, sl: str, tl: str) -> str:
