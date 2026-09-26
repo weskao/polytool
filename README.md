@@ -3,10 +3,6 @@
 Personal text, image, conversion, and vChewing command-line utilities packaged
 as one Python project.
 
-> AI account management has migrated to the independent public repository
-> **ai-accounts**: [https://github.com/weskao/ai-accounts](https://github.com/weskao/ai-accounts).
-> This project no longer contains or installs those commands.
-
 ## Requirements
 
 - Python 3.10 or newer
