@@ -1,11 +1,23 @@
-## [Unreleased]
+## [6.0.0] - 2026-09-26
 
-### Changed
+### 🐛 Bug Fixes
 
-- AI account management moved to
-  [ai-accounts](https://github.com/weskao/ai-accounts); this package now ships
-  only its personal utility commands.
+- Rewrite stale autoswitch hooks
+- **gtrans:** Update google translate client parameter
 
+### 🚜 Refactor
+
+- [**breaking**] Move account tools to ai-accounts
+
+### 📚 Documentation
+
+- Link the transferred account project
+- Make the ai-accounts migration link explicit
+- Use markdown link syntax for ai-accounts url
+
+### ⚙️ Miscellaneous Tasks
+
+- Ignore .omc directory
 ## [5.0.0] - 2026-08-21
 
 ### 🚀 Features
@@ -24,6 +36,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Resync uv.lock with the released version bump
+- **release:** Bump version to 5.0.0
 ## [4.0.0] - 2026-08-20
 
 ### 🚀 Features
