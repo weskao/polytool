@@ -1,3 +1,16 @@
+## [6.1.0] - 2026-11-23
+
+### 🚀 Features
+
+- **charcount:** Support positional file inputs
+
+### 🐛 Bug Fixes
+
+- **charcount:** Warn for missing path-like input
+
+### 📚 Documentation
+
+- Remove ai-accounts migration note from readme
 ## [6.0.0] - 2026-09-26
 
 ### 🐛 Bug Fixes
