@@ -19,6 +19,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("text", nargs="*", help="Text to count (positional)")
     args = parser.parse_args(argv)
 
+    # A lone positional naming an existing file means "count that file", not its name.
+    if not args.file and len(args.text) == 1 and Path(args.text[0]).expanduser().is_file():
+        args.file = args.text[0]
+
     if args.file:
         path = Path(args.file).expanduser()
         if not path.is_absolute():

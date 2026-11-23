@@ -56,6 +56,7 @@ or `xsel` on Linux.
 ```sh
 charcount "Hello world"
 charcount -f notes.txt
+charcount notes.txt        # a lone argument naming an existing file is read as a file
 charcount -l 3000 "some text"
 ```
 
