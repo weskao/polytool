@@ -20,8 +20,17 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     # A lone positional naming an existing file means "count that file", not its name.
-    if not args.file and len(args.text) == 1 and Path(args.text[0]).expanduser().is_file():
-        args.file = args.text[0]
+    if not args.file and len(args.text) == 1:
+        candidate = Path(args.text[0]).expanduser()
+        if candidate.is_file():
+            args.file = args.text[0]
+        # shortcut: "looks like a path" = has "/" or a space-free extension; may hint on "v1.2"
+        elif "/" in args.text[0] or (candidate.suffix and " " not in candidate.suffix):
+            print(
+                f"⚠️  File not found: {candidate} — counting the argument as text"
+                " (use -f to require a file)",
+                file=sys.stderr,
+            )
 
     if args.file:
         path = Path(args.file).expanduser()
